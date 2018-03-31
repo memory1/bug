@@ -26,7 +26,7 @@ BJTeam = ['baochenw', 'weiy', 'shuhuawang', 'agong', 'jinxingh', 'hongshengl', '
           'scheng', 'rli', 'txiong', 'cn-dev-vc-win', 'lxclient-bj-dev', 'view-triage', 'yuetingz']
 
 
-# KenTeam = ['ysan', 'ltim', 'boshil', 'zlin', 'ljack', 'xinshul', 'swan', 'llv', 'scheng', 'youx', 'jsong','zhoujing']
+KenTeam = ['ysan', 'ltim', 'boshil', 'zlin', 'ljack', 'xinshul', 'swan', 'llv', 'scheng', 'youx', 'jsong','zhoujing']
 
 # test method
 def createbuglist():
@@ -185,9 +185,9 @@ if __name__ == "__main__":
     getRegression('CART18FQ4', '18fq4_regression.xlsx')
     getRegression('CART18FQ3', '18fq3_regression.xlsx')
     getRegression('Cart17Q2', '18fq2_regression.xlsx')
-    # getBugbyDateforKenTeam('CART18FQ4', '18fq4_ken.xlsx')
-    # analyze('18fq4_ken.xlsx', 'analyze_18fq4_ken.xlsx')
-    # getassigneelist('Cart17Q1')
+    #getBugbyDateforKenTeam('CART18FQ4', '18fq4_ken.xlsx')
+    analyze('18fq4_regression.xlsx', 'analyze_18fq4_regression.xlsx')
+    #getassigneelist('Cart17Q1')
     # getBugbyDateforTeam('Cart17Q1', '18fq1_bj_defect_min.xlsx', '18fq1_pa_defect_min.xlsx')
     # getBugbyDateforTeam('Cart17Q2', '18fq2_bj_defect_ser.xlsx', '18fq2_pa_defect_ser.xlsx')
     # getBugbyDateforTeam('CART18FQ3', '18fq3_bj_defect_ser.xlsx', '18fq3_pa_defect_ser.xlsx')
