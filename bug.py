@@ -10,7 +10,7 @@ import numpy as np
 import requests
 import http.client
 import json
-import MySQLdb
+import pymysql
 import socket
 import fcntl
 import struct
@@ -46,7 +46,7 @@ def substr(string):
 
 ##test method for debug or search sth
 def test():
-    bzdb_conn = MySQLdb.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
+    bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
 
     cursor = bzdb_conn.cursor()
 
@@ -69,7 +69,7 @@ def test():
 
 #Count bug by reporter
 def count_by_person(foundin_id, phaselist):
-    bzdb_conn = MySQLdb.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
+    bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
     print(phaselist)
     if len(phaselist)>1:
@@ -82,7 +82,7 @@ def count_by_person(foundin_id, phaselist):
     return result_json
 
 def count_by_person_allphase(foundin_id):
-    bzdb_conn = MySQLdb.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
+    bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
     sql = """select login_name,count(reporter) from bugs,profiles where bugs.reporter = profiles.userid  and bugs.found_in_version_id= '{0}' group by bugs.reporter""".format(foundin_id)
     cursor.execute(sql)
@@ -91,7 +91,7 @@ def count_by_person_allphase(foundin_id):
     return result_json
 
 def bug_cycle(bug_id):
-    bzdb_conn = MySQLdb.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
+    bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
     sql = """select * from bugs_activity where bug_id='{0}'""".format(bug_id)
     cursor.execute(sql)
@@ -101,7 +101,7 @@ def bug_cycle(bug_id):
 
 #get foundin ID
 def getFoundin(foundin_name):
-    bzdb_conn = MySQLdb.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
+    bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
     sql = """select id from versions where name= '{0}' """.format(foundin_name)
     cursor.execute(sql)
@@ -113,7 +113,7 @@ def getFoundin(foundin_name):
 
 # get foundin phase
 def getFoundinPhase(foundin_id, foundin_phase):
-    bzdb_conn = MySQLdb.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
+    bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
     print(foundin_phase)
     if len(foundin_phase)>1:
@@ -135,7 +135,7 @@ def getFoundinPhase(foundin_id, foundin_phase):
     return phaselist1
 
 def getCountbyPhase(foundin_id, foundin_phase):
-    bzdb_conn = MySQLdb.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
+    bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
     print(foundin_phase)
     i18nbug = ('1800', '1742', '2451' , '736')
@@ -148,8 +148,8 @@ def getCountbyPhase(foundin_id, foundin_phase):
     return result
 
 def getBugbyDate(foundin_id):
-    bzdb_conn = MySQLdb.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
-    zdb_conn = MySQLdb.connect(host="bz3-db3.eng.vmware.com", port=3306, user="mts", passwd="mts", db="bugzilla")
+    bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
+    zdb_conn = pymysql.connect(host="bz3-db3.eng.vmware.com", port=3306, user="mts", passwd="mts", db="bugzilla")
     cursor = bzdb_conn.cursor()
     i18nbug = ('2451', '1800','1742', '736')
     # includes ('L10n Feature Pack', 'L10n Remote Client', 'L10n Server' 'Documentation')
@@ -160,7 +160,7 @@ def getBugbyDate(foundin_id):
     return result_json
 
 def getRegressionBug(foundin_id):
-    bzdb_conn = MySQLdb.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
+    bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
     i18nbug = ('2451', '1800','1742', '736')
     sql = """select creation_ts, bug_id,cf_regression from bugs where found_in_version_id = '{0}' and product_id = '18' and category_id not in {1} and cf_type = 'Defect' and short_desc NOT LIKE '%[i18N%' and cf_regression = 'Yes'""".format(foundin_id, i18nbug)
@@ -170,7 +170,7 @@ def getRegressionBug(foundin_id):
     return result_json
 
 def getBugbyDateforTeam(foundin_id):
-    bzdb_conn = MySQLdb.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
+    bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
     i18nbug = ('2451', '1800','1742', '736')
     #sql = """select login_name, creation_ts, bug_id, short_desc from bugs, profiles where bugs.assigned_to = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1}  and cf_type = 'Defect' and short_desc NOT LIKE '%[i18N%'""".format(foundin_id, i18nbug)
@@ -184,7 +184,7 @@ def getBugbyDateforTeam(foundin_id):
 
 
 def getBugbyDateforReportTeam(foundin_id):
-    bzdb_conn = MySQLdb.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
+    bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
     i18nbug = ('2451', '1800','1742', '736')
     sql = """select login_name, creation_ts, bug_id from bugs, profiles where bugs.reporter = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1}""".format(foundin_id, i18nbug)
@@ -194,7 +194,7 @@ def getBugbyDateforReportTeam(foundin_id):
     return result_json
 
 def getAllAssignee(foundin_id):
-    bzdb_conn = MySQLdb.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
+    bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
     i18nbug = ('2451', '1800','1742', '736')
     sql = """select login_name from bugs, profiles where bugs.assigned_to = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1} and bug_severity in ('critical', 'catastrophic') """.format(foundin_id, i18nbug)
@@ -204,8 +204,8 @@ def getAllAssignee(foundin_id):
     return result_json
 
 def getBugbyDateandPro(foundin_id, severity):
-    bzdb_conn = MySQLdb.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
-    zdb_conn = MySQLdb.connect(host="bz3-db3.eng.vmware.com", port=3306, user="mts", passwd="mts", db="bugzilla")
+    bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
+    zdb_conn = pymysql.connect(host="bz3-db3.eng.vmware.com", port=3306, user="mts", passwd="mts", db="bugzilla")
     cursor = bzdb_conn.cursor()
     i18nbug = ('2451', '1800','1742', '736')
     sql = """select creation_ts, bug_id from bugs where found_in_version_id = '{0}' and product_id = '18' and category_id not in {1} and bug_severity = '{2}'""".format(foundin_id, i18nbug, severity)
