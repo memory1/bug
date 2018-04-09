@@ -3,12 +3,12 @@
 import bug
 import json
 from bugInfo import bugInfo
-import time
+#import time
 import datetime
 import xlsxwriter
-import os.path
+#import os.path
 import pytz
-import numpy as np
+#import numpy as np
 import pandas as pd
 
 """BJTeam = ['baochenw', 'weiy', 'shuhuawang', 'agong', 'jinxingh', 'hongshengl', 'myuan', 'luliu', 'jhuo', 'rxing',
@@ -136,7 +136,6 @@ def ConvertTStoDateList(result):
         datelist.append(date)
     return datelist
 
-
 def getassigneelist(foundin):
     foundin_id = bug.getFoundin(foundin)
     result = bug.getAllAssignee(foundin_id)
@@ -154,10 +153,9 @@ def getassigneelist(foundin):
     filename = "assignee_"+foundin.strip()+".xlsx"
     writetofile(filename, dateset, datelist, 'No')
 
-
-def getBugbyDateforTeam(foundin, filename1, filename2):
+def getBugDateforTeam(foundin, filename1, filename2, severity='all',cf_regression = "No"):
     foundin_id = bug.getFoundin(foundin)
-    result = bug.getBugbyDateforTeam(foundin_id)
+    result = bug.getBugbyDateforTeam(foundin_id,severity,cf_regression)
     array = json.loads(result)
     BJBugs = []
     PABugs = []
@@ -254,24 +252,33 @@ def analyze(infilename, outfilename):
 
 if __name__ == "__main__":
     print('This is main of module "getDate.py"')
-    #getRegression('CART18FQ4', '18fq4_regression.xlsx')
-    #getRegression('CART18FQ3', '18fq3_regression.xlsx')
     found_in='CART19FQ2'
-    getRegression(found_in, found_in +'_regression.xlsx')
-    #getBugbyDateforKenTeam('CART18FQ4', '18fq4_ken.xlsx')
+    """getRegression(found_in, found_in +'_regression.xlsx')
     SourceFile = found_in +'_regression.xlsx'
     analyze(SourceFile, 'analyze_' + SourceFile)
     getassigneelist(found_in)
-    getBugbyDateforTeam(found_in, found_in +'_bj_defects_all.xlsx',found_in+'_pa_defects_all.xlsx')
+    """
+    getBugDateforTeam(found_in, found_in + '_bj_defects_all.xlsx', found_in + '_pa_defects_all.xlsx')
+    getBugDateforTeam(found_in, found_in + '_bj_defects_critical.xlsx', found_in + '_pa_defects_critical.xlsx',severity="('critical','catastrophic')")
+    getBugDateforTeam(found_in, found_in + '_bj_defects_regression.xlsx', found_in + '_pa_defects_regression.xlsx',severity="('critical','catastrophic')",cf_regression='Yes')
+
+    """
     SourceFile= found_in +'_bj_defects_all.xlsx'
     analyze(SourceFile, 'analyze_' + SourceFile)
     SourceFile = found_in+'_pa_defects_all.xlsx'
     analyze(SourceFile, 'analyze_' + SourceFile)
-
-    #createbuglist()
+    """
     BugNumbySeverity(found_in, found_in + 'bugcount_Defect.xlsx')
-    # analyze('bugcount_q4_Defect.xlsx', 'analyze_q4_Defect.xlsx')
+    BugNumbySeverity(found_in, found_in + 'bugcount_Defect_Critical.xlsx',severity="('critical','catastrophic')")
 
+    foundin_id = bug.getFoundin(found_in)
+    print(bug.getFoundinPhase(foundin_id,"('FC')"))
+    print(bug.getFoundinPhase(foundin_id))
+    # createbuglist()
+    #getRegression('CART18FQ4', '18fq4_regression.xlsx')
+    #getRegression('CART18FQ3', '18fq3_regression.xlsx')
+    #getBugbyDateforKenTeam('CART18FQ4', '18fq4_ken.xlsx')
+    # analyze('bugcount_q4_Defect.xlsx', 'analyze_q4_Defect.xlsx')
     # getBugbyDateforTeam('Cart17Q2', '18fq2_bj_defect_ser.xlsx', '18fq2_pa_defect_ser.xlsx')
     # getBugbyDateforTeam('CART18FQ3', '18fq3_bj_defect_ser.xlsx', '18fq3_pa_defect_ser.xlsx')
     # getBugbyDateforTeam('CART18FQ4', '18fq4_bj_defect_min.xlsx', '18fq4_pa_defect_min.xlsx')

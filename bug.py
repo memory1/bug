@@ -1,19 +1,18 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-from flask import Flask,request,Response
-from flask import send_file
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import numpy as np
-import requests
-import http.client
-import json
+#from flask import Flask,request,Response
+#from flask import send_file
+#import matplotlib
+#matplotlib.use('Agg')
+#import matplotlib.pyplot as plt
+#import numpy as np
+#import requests
+#import http.client
 import pymysql
-import socket
-import fcntl
-import struct
+#import socket
+#import fcntl
+#import struct
 from bson import json_util
 import json
 
@@ -94,9 +93,11 @@ def bug_cycle(bug_id):
     bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
     sql = """select * from bugs_activity where bug_id='{0}'""".format(bug_id)
+    print(sql)
     cursor.execute(sql)
     update = cursor.fetchall()
     result_json=json.dumps(update,default=json_util.default)
+    print(result_json)
     return result_json
 
 #get foundin ID
@@ -112,18 +113,19 @@ def getFoundin(foundin_name):
     return array[0][0]
 
 # get foundin phase
-def getFoundinPhase(foundin_id, foundin_phase):
+def getFoundinPhase(foundin_id, foundin_phase=''):
     bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
-    print(foundin_phase)
     if len(foundin_phase)>1:
-        sql = """select id from phases where name in {0} and  version_id = '{1}' """.format(foundin_phase, foundin_id)
-    else: 
-        sql = """select id from phases where name = '{0}' and  version_id = '{1}' """.format(foundin_phase[0], foundin_id)
+      sql = """select id,name from phases where name in {0} and version_id = '{1}' """.format(foundin_phase, foundin_id)
+    else:
+      sql = """select id,name from phases where version_id = '{0}' """.format(foundin_id)
+    print(sql)
     cursor.execute(sql)
     result= cursor.fetchall()
     result_json = json.dumps(result)
     array = json.loads(result_json)
+    print(array)
     phaselist = []
     for element in array:
         phaselist.append(element[0])
@@ -141,7 +143,7 @@ def getCountbyPhase(foundin_id, foundin_phase):
     i18nbug = ('1800', '1742', '2451' , '736')
     if len(foundin_phase)>1:
         sql = """select count(*) from bugs where found_in_phase_id in {0} and  found_in_version_id = '{1}' and product_id = '18' and category_id not in {2}""".format(foundin_phase, foundin_id, i18nbug)
-    else: 
+    else:
         sql = """select count(*)  from bugs where found_in_phase_id = '{0}' and  found_in_version_id = '{1}' and product_id = '18' and category_id not in {2}""".format(foundin_phase[0], foundin_id, i18nbug)
     cursor.execute(sql)
     result= cursor.fetchall()
@@ -171,19 +173,25 @@ def getRegressionBug(foundin_id):
     result_json=json.dumps(result,default=json_util.default)
     return result_json
 
-def getBugbyDateforTeam(foundin_id):
+def getBugbyDateforTeam(foundin_id,severity = 'all',cf_regression='No'):
     bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
     i18nbug = ('2451', '1800','1742', '736')
     #sql = """select login_name, creation_ts, bug_id, short_desc from bugs, profiles where bugs.assigned_to = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1}  and cf_type = 'Defect' and short_desc NOT LIKE '%[i18N%'""".format(foundin_id, i18nbug)
     #sql = """select login_name, creation_ts, bug_id from bugs, profiles where bugs.assigned_to = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1}  and bug_severity in ('critical', 'catastrophic') and priority in ('P0', 'P1') and cf_type = 'Defect' and short_desc NOT LIKE '%[i18N%'""".format(foundin_id, i18nbug)
     #sql = """select login_name, creation_ts, bug_id from bugs, profiles where bugs.assigned_to = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1}  and priority in ('P2', 'P3', 'P4', '---') and cf_type = 'Defect' and short_desc NOT LIKE '%[i18N%'""".format(foundin_id, i18nbug)
-    sql = """select login_name, creation_ts, bug_id from bugs, profiles where bugs.assigned_to = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1}  and bug_severity in ('serious', 'minor', 'cosmetic') and priority in ('P0', 'P1') and cf_type = 'Defect' and short_desc NOT LIKE '%[i18N%'""".format(foundin_id, i18nbug)
+    if severity is 'all':
+        sql = """select login_name, creation_ts, bug_id from bugs, profiles where bugs.assigned_to = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1} and cf_type = 'Defect' and short_desc NOT LIKE '%[i18N%'""".format(foundin_id, i18nbug)
+    else:
+        sql = """select login_name, creation_ts, bug_id from bugs, profiles where bugs.assigned_to = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1} and priority in ('P0', 'P1') and cf_type = 'Defect' and short_desc NOT LIKE '%[i18N%' and bug_severity in {2}""".format(
+            foundin_id, i18nbug, severity)
+    if cf_regression is 'Yes':
+        sql +=  """ and cf_regression = 'Yes'"""
+    print(sql)
     cursor.execute(sql)
     result= cursor.fetchall()
     result_json=json.dumps(result,default=json_util.default)
     return result_json
-
 
 def getBugbyDateforReportTeam(foundin_id):
     bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
@@ -215,7 +223,7 @@ def getBugListbySeverity(foundin_id, severity):
     if severity is 'all':
         sql =  """select creation_ts, bug_id from bugs where found_in_version_id = '{0}' and product_id = '18' and category_id not in {1}""".format(foundin_id, i18nbug)
     else:
-        sql = """select creation_ts, bug_id from bugs where found_in_version_id = '{0}' and product_id = '18' and category_id not in {1} and bug_severity = '{2}'""".format(foundin_id, i18nbug, severity)
+        sql = """select creation_ts, bug_id,bug_severity from bugs where found_in_version_id = '{0}' and product_id = '18' and category_id not in {1} and bug_severity in {2}""".format(foundin_id, i18nbug, severity)
     print(sql)
     cursor.execute(sql)
     result= cursor.fetchall()
@@ -226,3 +234,4 @@ if __name__ == "__main__":
     print ('This is main of module "bug.py"')
     test()
     #getBugbyDateforTeam('4926')
+    bug_cycle("1968057")
