@@ -107,7 +107,7 @@ def getFoundin(foundin_name):
     cursor.execute(sql)
     result= cursor.fetchall()
     result_json = json.dumps(result)
-    print(result_json)
+    #print(result_json)
     array = json.loads(result_json)
     return array[0][0]
 

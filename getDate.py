@@ -72,15 +72,17 @@ def getassigneelist(foundin):
     foundin_id = bug.getFoundin(foundin)
     result = bug.getAllAssignee(foundin_id)
     array = json.loads(result)
+    print("All assignees: ")
+    print(array)
     assigneelist = []
     datelist = []
     for element in array:
         assigneelist.append(element[0])
     dateset = set(assigneelist)
     for element in dateset:
-        print(element)
+        #print(element)
         count = assigneelist.count(element)
-        print(count)
+        #print(count)
         datelist.append(count)
     filename = "assignee_q1.xlsx"
     writetofile(filename, dateset, datelist, 'No')
@@ -171,10 +173,12 @@ def analyze(infilename, outfilename):
     weekcount = []
     originaldata = pd.DataFrame(pd.read_excel(infilename))
     originaldata = originaldata.set_index('Time')
-    test = originaldata.resample('W', how=sum).fillna(0)
+    test = originaldata.resample('W').sum().fillna(0)
+    #print('test:')
+    #print(test)
     for column in test.columns:
         for idx in test[column].index:
-            x = test.get_value(idx, column)
+            x = test.at[idx,column]
             weeklist.append(idx)
             weekcount.append(x)
     writetofile(outfilename, weeklist, weekcount, 'Yes')
@@ -182,12 +186,12 @@ def analyze(infilename, outfilename):
 
 if __name__ == "__main__":
     print('This is main of module "getDate.py"')
-    getRegression('CART18FQ4', '18fq4_regression.xlsx')
+    #getRegression('CART18FQ4', '18fq4_regression.xlsx')
     #getRegression('CART18FQ3', '18fq3_regression.xlsx')
     #getRegression('Cart17Q2', '18fq2_regression.xlsx')
     #getBugbyDateforKenTeam('CART18FQ4', '18fq4_ken.xlsx')
     #analyze('18fq4_regression.xlsx', 'analyze_18fq4_regression.xlsx')
-    getassigneelist('Cart17Q1')
+    #getassigneelist('Cart17Q1')
     getBugbyDateforTeam('Cart17Q1', '18fq1_bj_defect_min.xlsx', '18fq1_pa_defect_min.xlsx')
     # getBugbyDateforTeam('Cart17Q2', '18fq2_bj_defect_ser.xlsx', '18fq2_pa_defect_ser.xlsx')
     # getBugbyDateforTeam('CART18FQ3', '18fq3_bj_defect_ser.xlsx', '18fq3_pa_defect_ser.xlsx')
