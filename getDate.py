@@ -143,7 +143,7 @@ def getassigneelist(foundin):
     assigneelist = []
     datelist = []
     for element in array:
-        assigneelist.append(element[0])
+        assigneelist.append("'"+element[0]+"',")
     dateset = set(assigneelist)
     for element in dateset:
         #print(element)
@@ -256,8 +256,9 @@ if __name__ == "__main__":
     """getRegression(found_in, found_in +'_regression.xlsx')
     SourceFile = found_in +'_regression.xlsx'
     analyze(SourceFile, 'analyze_' + SourceFile)
-    getassigneelist(found_in)
     """
+    getassigneelist(found_in)
+
     getBugDateforTeam(found_in, found_in + '_bj_defects_all.xlsx', found_in + '_pa_defects_all.xlsx')
     getBugDateforTeam(found_in, found_in + '_bj_defects_critical.xlsx', found_in + '_pa_defects_critical.xlsx',severity="('critical','catastrophic')")
     getBugDateforTeam(found_in, found_in + '_bj_defects_regression.xlsx', found_in + '_pa_defects_regression.xlsx',severity="('critical','catastrophic')",cf_regression='Yes')
