@@ -46,7 +46,7 @@ def getRegression(foundin, filename):
 
 def getdatelist2(foundin, severity):
 	foundin_id = bug.getFoundin(foundin)
-	result = bug.getBugbyDateandPro(foundin_id, severity)
+	result = bug.getBugListbySeverity(foundin_id, severity)
 	return resultclean(result)
 
 # change data format

@@ -159,6 +159,8 @@ def getBugbyDate(foundin_id):
     result_json=json.dumps(result,default=json_util.default)
     return result_json
 
+"""get regression bug list in a release: creation_ts, bug_id,cf_regression     
+"""
 def getRegressionBug(foundin_id):
     bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
@@ -197,18 +199,24 @@ def getAllAssignee(foundin_id):
     bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
     i18nbug = ('2451', '1800','1742', '736')
-    sql = """select login_name from bugs, profiles where bugs.assigned_to = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1} and bug_severity in ('critical', 'catastrophic') """.format(foundin_id, i18nbug)
+    #sql = """select login_name from bugs, profiles where bugs.assigned_to = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1} and bug_severity in ('critical', 'catastrophic') """.format(foundin_id, i18nbug)
+    sql = """select login_name from bugs, profiles where bugs.assigned_to = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1}  """.format(
+        foundin_id, i18nbug)
     cursor.execute(sql)
     result= cursor.fetchall()
     result_json=json.dumps(result)
     return result_json
 
-def getBugbyDateandPro(foundin_id, severity):
+def getBugListbySeverity(foundin_id, severity):
     bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     zdb_conn = pymysql.connect(host="bz3-db3.eng.vmware.com", port=3306, user="mts", passwd="mts", db="bugzilla")
     cursor = bzdb_conn.cursor()
     i18nbug = ('2451', '1800','1742', '736')
-    sql = """select creation_ts, bug_id from bugs where found_in_version_id = '{0}' and product_id = '18' and category_id not in {1} and bug_severity = '{2}'""".format(foundin_id, i18nbug, severity)
+    if severity is 'all':
+        sql =  """select creation_ts, bug_id from bugs where found_in_version_id = '{0}' and product_id = '18' and category_id not in {1}""".format(foundin_id, i18nbug)
+    else:
+        sql = """select creation_ts, bug_id from bugs where found_in_version_id = '{0}' and product_id = '18' and category_id not in {1} and bug_severity = '{2}'""".format(foundin_id, i18nbug, severity)
+    print(sql)
     cursor.execute(sql)
     result= cursor.fetchall()
     result_json=json.dumps(result,default=json_util.default)

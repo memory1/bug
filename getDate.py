@@ -8,11 +8,10 @@ import datetime
 import xlsxwriter
 import os.path
 import pytz
-
 import numpy as np
 import pandas as pd
 
-BJTeam = ['baochenw', 'weiy', 'shuhuawang', 'agong', 'jinxingh', 'hongshengl', 'myuan', 'luliu', 'jhuo', 'rxing',
+"""BJTeam = ['baochenw', 'weiy', 'shuhuawang', 'agong', 'jinxingh', 'hongshengl', 'myuan', 'luliu', 'jhuo', 'rxing',
           'yyu1', 'wenshuoc', 'dengy', 'jingy',
           'nge', 'songlil', 'linz', 'smangui', 'bnie', 'gsi', 'xinyangl', 'xwei', 'yanx', 'tzhao', 'vzheng', 'yuez',
           'hek', 'zhaoli', 'bliu', 'jjliu', 'boliu', 'menx', 'qsun', 'dongw', 'wangxiao', 'wyattx', 'yuanmengx',
@@ -23,8 +22,76 @@ BJTeam = ['baochenw', 'weiy', 'shuhuawang', 'agong', 'jinxingh', 'hongshengl', '
           'zhiminl', 'yyun',
           'view-ios', 'oye', 'pcoip', 'fyan', 'amzhang', 'boshil', 'kkong', 'ltim', 'pewang', 'qhuang', 'shik', 'zlin',
           'yanh', 'jjzhang',
-          'scheng', 'rli', 'txiong', 'cn-dev-vc-win', 'lxclient-bj-dev', 'view-triage', 'yuetingz']
+          'scheng', 'rli', 'txiong', 'cn-dev-vc-win', 'lxclient-bj-dev', 'view-triage', 'yuetingz']"""
 
+BJTeam = ['agong',
+        'anh',
+        'baic',
+        'baochenw',
+        'bliu',
+        'boliu',
+        'chenyu',
+        'cn-dev-web',
+        'dongyuz',
+        'fabulatech_guru',
+        'fyan',
+        'gaog',
+        'gsi',
+        'guoxin',
+        'hbai',
+        'hek',
+        'hongshengl',
+        'jhuo',
+        'jjliu',
+        'kkong',
+        'ksong',
+        'leviz',
+        'lihuang',
+        'linali',
+        'linz',
+        'mlu',
+        'msun',
+        'myuan',
+        'mzang',
+        'nge',
+        'pcoip',
+        'pewang',
+        'pguo',
+        'qinz',
+        'qsun',
+        'renz',
+        'rxing',
+        'shik',
+        'shou',
+        'shuhuawang',
+        'smangui',
+        'songlil',
+        'songyu',
+        'thinprint_guru',
+        'tzhao',
+        'vdesktop-devops',
+        'view-ios',
+        'view-osx',
+        'wangxiao',
+        'wbai',
+        'weiy',
+        'wenshuoc',
+        'wenyuzhao',
+        'wincdk_guru',
+        'wyattx',
+        'xinyangl',
+        'xwei',
+        'yanx',
+        'ysan',
+        'yuez',
+        'yul',
+        'yun',
+        'yyu1',
+        'yyun',
+        'zhaoli',
+        'zhiminl',
+        'zji',
+        'zzhou']
 
 KenTeam = ['ysan', 'ltim', 'boshil', 'zlin', 'ljack', 'xinshul', 'swan', 'llv', 'scheng', 'youx', 'jsong','zhoujing']
 
@@ -38,27 +105,29 @@ def createbuglist():
         buginfo = bugInfo(element[1], date, "")
         bugs.append(buginfo)
 
-def getdatelist(foundin):
+def getRegressionBugDateList(foundin):
     foundin_id = bug.getFoundin(foundin)
     result = bug.getRegressionBug(foundin_id)
-    return resultclean(result)
+    return ConvertTStoDateList(result)
 
 
 def getRegression(foundin, filename):
     foundin_id = bug.getFoundin(foundin)
     result = bug.getRegressionBug(foundin_id)
-    datelist = resultclean(result)
+    datelist = ConvertTStoDateList(result)
     count(datelist, filename)
 
 
-def getdatelist2(foundin, severity):
+def getBugDateListbySeverity(foundin, severity):
     foundin_id = bug.getFoundin(foundin)
-    result = bug.getBugbyDateandPro(foundin_id, severity)
-    return resultclean(result)
+    print(foundin_id)
+    result = bug.getBugListbySeverity(foundin_id, severity)
+    print(result)
+    return ConvertTStoDateList(result)
 
 
-# change data format
-def resultclean(result):
+# return a list of dates (mmddyy)
+def ConvertTStoDateList(result):
     array = json.loads(result)
     datelist = []
     for element in array:
@@ -72,8 +141,6 @@ def getassigneelist(foundin):
     foundin_id = bug.getFoundin(foundin)
     result = bug.getAllAssignee(foundin_id)
     array = json.loads(result)
-    print("All assignees: ")
-    print(array)
     assigneelist = []
     datelist = []
     for element in array:
@@ -84,7 +151,7 @@ def getassigneelist(foundin):
         count = assigneelist.count(element)
         #print(count)
         datelist.append(count)
-    filename = "assignee_q1.xlsx"
+    filename = "assignee_"+foundin.strip()+".xlsx"
     writetofile(filename, dateset, datelist, 'No')
 
 
@@ -97,12 +164,12 @@ def getBugbyDateforTeam(foundin, filename1, filename2):
     for element in array:
         tz = pytz.timezone('US/Pacific')
         date = datetime.datetime.fromtimestamp(element[1].get('$date') / 1e3, pytz.utc).date()
-        print(element[2])
-        print(date)
         if element[0] in BJTeam:
             BJBugs.append(date)
+            #print("BJ:" + element[0])
         else:
             PABugs.append(date)
+            #print("PA:" + element[0])
     count(BJBugs, filename1)
     count(PABugs, filename2)
 
@@ -134,12 +201,13 @@ def count(datelist, filename):
     writetofile(filename, datesub, datacount, 'No')
 
 
-def calculatebyDate(foundin, filename, severity='all'):
-    if severity is 'all':
-        datelist = getdatelist(foundin)
+def BugNumbySeverity(foundin, filename, severity='all',regression ='n'):
+    if regression is 'y':
+        datelist = getRegressionBugDateList(foundin)
         print(datelist)
     else:
-        datelist = getdatelist2(foundin, severity)
+        datelist = getBugDateListbySeverity(foundin, severity)
+        print(datelist)
     count(datelist, filename);
 
 
@@ -188,11 +256,22 @@ if __name__ == "__main__":
     print('This is main of module "getDate.py"')
     #getRegression('CART18FQ4', '18fq4_regression.xlsx')
     #getRegression('CART18FQ3', '18fq3_regression.xlsx')
-    #getRegression('Cart17Q2', '18fq2_regression.xlsx')
+    found_in='CART19FQ2'
+    getRegression(found_in, found_in +'_regression.xlsx')
     #getBugbyDateforKenTeam('CART18FQ4', '18fq4_ken.xlsx')
-    #analyze('18fq4_regression.xlsx', 'analyze_18fq4_regression.xlsx')
-    #getassigneelist('Cart17Q1')
-    getBugbyDateforTeam('Cart17Q1', '18fq1_bj_defect_min.xlsx', '18fq1_pa_defect_min.xlsx')
+    SourceFile = found_in +'_regression.xlsx'
+    analyze(SourceFile, 'analyze_' + SourceFile)
+    getassigneelist(found_in)
+    getBugbyDateforTeam(found_in, found_in +'_bj_defects_all.xlsx',found_in+'_pa_defects_all.xlsx')
+    SourceFile= found_in +'_bj_defects_all.xlsx'
+    analyze(SourceFile, 'analyze_' + SourceFile)
+    SourceFile = found_in+'_pa_defects_all.xlsx'
+    analyze(SourceFile, 'analyze_' + SourceFile)
+
+    #createbuglist()
+    BugNumbySeverity(found_in, found_in + 'bugcount_Defect.xlsx')
+    # analyze('bugcount_q4_Defect.xlsx', 'analyze_q4_Defect.xlsx')
+
     # getBugbyDateforTeam('Cart17Q2', '18fq2_bj_defect_ser.xlsx', '18fq2_pa_defect_ser.xlsx')
     # getBugbyDateforTeam('CART18FQ3', '18fq3_bj_defect_ser.xlsx', '18fq3_pa_defect_ser.xlsx')
     # getBugbyDateforTeam('CART18FQ4', '18fq4_bj_defect_min.xlsx', '18fq4_pa_defect_min.xlsx')
