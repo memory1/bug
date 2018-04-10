@@ -1,0 +1,1 @@
+select count(*) from bugs_activity where bug_id='1952900' and added in ('new','assigned','reopened') and removed in ('resolved','fixed','closed')

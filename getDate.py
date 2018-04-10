@@ -97,7 +97,7 @@ KenTeam = ['ysan', 'ltim', 'boshil', 'zlin', 'ljack', 'xinshul', 'swan', 'llv', 
 
 # test method
 def createbuglist():
-    foundin_id = bug.getBugbyDate('4926')
+    foundin_id = bug.getBugbyFoundin('4926')
     array = json.loads(foundin_id)
     bugs = []
     for element in array:
@@ -208,6 +208,24 @@ def BugNumbySeverity(foundin, filename, severity='all',regression ='n'):
         print(datelist)
     count(datelist, filename);
 
+def ReopenNumbyWeekTeam(foundin):
+    foundin_id = bug.getFoundin(foundin)
+    result = bug.getReopenlist(foundin_id)
+    print(result)
+    array = json.load(result)
+
+    for element in array:
+        tz = pytz.timezone('US/Pacific')
+        date = datetime.datetime.fromtimestamp(element[0].get('$date') / 1e3, pytz.utc).date()
+        element[0] = date
+        BJReopen=[]
+        PAReopen=[]
+        if element[2] in BJTeam:
+            BJReopen.append(element)
+        else:
+            PAReopen.append(element)
+        count(BJReopen[0], foundin+'BJReopen.xlsx')
+        count(PAReopen[0], foundin+'PAReopen.xlsx')
 
 def writetofile(excel_name='bugcount.xlsx', data1=[], data2=[], line_chart='Yes'):
     workbook = xlsxwriter.Workbook(excel_name)
@@ -253,21 +271,23 @@ def analyze(infilename, outfilename):
 if __name__ == "__main__":
     print('This is main of module "getDate.py"')
     found_in='CART19FQ2'
+
     """getRegression(found_in, found_in +'_regression.xlsx')
     SourceFile = found_in +'_regression.xlsx'
     analyze(SourceFile, 'analyze_' + SourceFile)
-    """
     getassigneelist(found_in)
-
     getBugDateforTeam(found_in, found_in + '_bj_defects_all.xlsx', found_in + '_pa_defects_all.xlsx')
     getBugDateforTeam(found_in, found_in + '_bj_defects_critical.xlsx', found_in + '_pa_defects_critical.xlsx',severity="('critical','catastrophic')")
     getBugDateforTeam(found_in, found_in + '_bj_defects_regression.xlsx', found_in + '_pa_defects_regression.xlsx',severity="('critical','catastrophic')",cf_regression='Yes')
-
-    """
     SourceFile= found_in +'_bj_defects_all.xlsx'
     analyze(SourceFile, 'analyze_' + SourceFile)
-    SourceFile = found_in+'_pa_defects_all.xlsx'
+    """
+    ReopenNumbyWeekTeam(found_in)
+    SourceFile = found_in + 'BJReopen.xlsx'
     analyze(SourceFile, 'analyze_' + SourceFile)
+    SourceFile = found_in + 'PAReopen.xlsx'
+    analyze(SourceFile, 'analyze_' + SourceFile)
+
     """
     BugNumbySeverity(found_in, found_in + 'bugcount_Defect.xlsx')
     BugNumbySeverity(found_in, found_in + 'bugcount_Defect_Critical.xlsx',severity="('critical','catastrophic')")
@@ -275,6 +295,7 @@ if __name__ == "__main__":
     foundin_id = bug.getFoundin(found_in)
     print(bug.getFoundinPhase(foundin_id,"('FC')"))
     print(bug.getFoundinPhase(foundin_id))
+    """
     # createbuglist()
     #getRegression('CART18FQ4', '18fq4_regression.xlsx')
     #getRegression('CART18FQ3', '18fq3_regression.xlsx')
