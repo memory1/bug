@@ -1,0 +1,11 @@
+bug_id,attach_id,who,bug_when,fieldid,added,removed,id
+1,NULL,56,"1998-05-06 21:53:49",10,analyzed,open,1
+1,NULL,56,"1998-05-06 22:19:22",16,devine,edward,2
+1,NULL,56,"1998-05-06 22:20:40",16,edward,devine,3
+6,NULL,35,"1998-05-16 15:57:23",10,closed,open,4
+11,NULL,56,"1998-05-18 17:21:48",10,closed,open,5
+10,NULL,35,"1998-05-19 14:36:48",10,closed,open,6
+13,NULL,35,"1998-05-19 15:53:39",10,closed,open,7
+1,NULL,75,"1998-06-01 11:52:56",10,closed,analyzed,8
+1,NULL,75,"1998-06-01 11:52:57",5,VGA,keyboard,9
+12,NULL,75,"1998-06-01 11:53:42",10,closed,open,10
