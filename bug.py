@@ -9,6 +9,8 @@
 #import numpy as np
 #import requests
 #import http.client
+import pandas as pd
+
 import pymysql
 #import socket
 #import fcntl
@@ -194,40 +196,33 @@ def getBugbyDateforTeam(foundin_id,severity = 'all',cf_regression='No'):
     result_json=json.dumps(result,default=json_util.default)
     return result_json
 
-def ReopenTimes(bug_id):
-    bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
-    cursor = bzdb_conn.cursor()
-    sql = """select count(*) from bugs_activity where bug_id='{0}' and added in ('new','assigned','reopened') and removed in ('resolved','fixed','closed')""".format(bug_id)
-    #print(sql)
-    cursor.execute(sql)
-    count = cursor.fetchall()
-    #print(count)
-    result_json=json.dumps(count,default=json_util.default)
-    #print(result_json)
-    return result_json
-
 def getReopenlist(foundin_id,severity = 'all'):
     result = getBugbyFoundin(foundin_id)
     array = json.loads(result)
-    reopenlist = []
-    for element in array:
-        #print(element[1])
-        reopenCount = ReopenTimes(element[1])
-        #print(reopenCount)
-        if reopenCount != '0':
-            reopenlist.append(element)
-        else:
-            print("not reopen")
-    reopenlist1 = tuple(reopenlist)
+    df=pd.DataFrame(array)
+    bugIDList=[]
+    dflist=df.iloc[:,1].tolist()
+    df1 = tuple(dflist)
+    bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER,
+                                passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
+    cursor = bzdb_conn.cursor()
+    sql = """select bug_id from bugs_activity where bug_id in {0} and added in ('new','assigned','reopened') and removed in ('resolved','fixed','closed')""".format(
+        str(df1))
+    print(sql)
+    cursor.execute(sql)
+    update = cursor.fetchall()
+    reopenlist = json.dumps(update,default=json_util.default)
     print("reopenlist:")
-    print(reopenlist1)
-    return reopenlist1
+    print(reopenlist)
+    print(df)
+    print(df.loc[df[1].isin(update)])
+
 
 def getBugbyDateforReportTeam(foundin_id):
     bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
     i18nbug = ('2451', '1800','1742', '736')
-    sql = """select login_name, creation_ts, bug_id,login_name from bugs, profiles where bugs.reporter = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1}""".format(foundin_id, i18nbug)
+    sql = """select creation_ts, bug_id,login_name from bugs, profiles where bugs.reporter = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1}""".format(foundin_id, i18nbug)
     cursor.execute(sql)
     result= cursor.fetchall()
     result_json=json.dumps(result,default=json_util.default)
