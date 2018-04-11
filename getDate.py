@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
+import pymysql
+
 import bug
 import json
 from bugInfo import bugInfo
@@ -8,8 +10,14 @@ import datetime
 import xlsxwriter
 #import os.path
 import pytz
-#import numpy as np
+import numpy as np
 import pandas as pd
+
+BUGZILLA_DATABASE_HOST = "bz3-db3.eng.vmware.com"
+BUGZILLA_DATABASE_PORT = 3306
+BUGZILLA_DATABASE_USER ="mts"
+BUGZILLA_DATABASE_PW="mts"
+BUGZILLA_DATABASE_DATABASE="bugzilla"
 
 """BJTeam = ['baochenw', 'weiy', 'shuhuawang', 'agong', 'jinxingh', 'hongshengl', 'myuan', 'luliu', 'jhuo', 'rxing',
           'yyu1', 'wenshuoc', 'dengy', 'jingy',
@@ -96,15 +104,32 @@ BJTeam = ['agong',
 KenTeam = ['ysan', 'ltim', 'boshil', 'zlin', 'ljack', 'xinshul', 'swan', 'llv', 'scheng', 'youx', 'jsong','zhoujing']
 
 # test method
-def createbuglist():
-    foundin_id = bug.getBugbyFoundin('4926')
-    array = json.loads(foundin_id)
+def createbuglist(foundin_id,excel_name):
+    bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER,
+                                passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
+    zdb_conn = pymysql.connect(host="bz3-db3.eng.vmware.com", port=3306, user="mts", passwd="mts", db="bugzilla")
+    cursor = bzdb_conn.cursor()
+    i18nbug = ('2451', '1800', '1742', '736')
+    # includes ('L10n Feature Pack', 'L10n Remote Client', 'L10n Server' 'Documentation')
+    sql = """select bug_id,login_name,bug_severity,bug_status,creation_ts,short_desc,priority,reporter,cf_regression from bugs,profiles where bugs.assigned_to = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1} and cf_type = 'Defect' and short_desc NOT LIKE '%[i18N%'""".format(
+        foundin_id, i18nbug)
+
+    print(sql)
+    cursor.execute(sql)
+    result = list(cursor.fetchall())
+    title = ['bug_id','assignee','bug_severity','bug_status','creation_ts','short_desc','priority','reporter','cf_regression']
+    df = pd.DataFrame(result,columns = title)
+    print(df)
+    writer = pd.ExcelWriter(excel_name,engine='xlsxwriter')
+    df.to_excel(writer,sheet_name="all bugs")
+
+    writer.save()
+    """array = json.loads(BugList)
     bugs = []
     for element in array:
         date = datetime.datetime.fromtimestamp(element[0].get('$date') / 1e3).date()
-        buginfo = bugInfo(element[1], date, "")
-        bugs.append(buginfo)
-
+        bugs.append( date,element[1:] )
+"""
 def getRegressionBugDateList(foundin):
     foundin_id = bug.getFoundin(foundin)
     result = bug.getRegressionBug(foundin_id)
@@ -211,20 +236,22 @@ def BugNumbySeverity(foundin, filename, severity='all',regression ='n'):
 def ReopenNumbyWeekTeam(foundin):
     foundin_id = bug.getFoundin(foundin)
     result = bug.getReopenlist(foundin_id)
-    """array = json.load(result)
-    for element in array:
+    reopenlist = np.array(result)
+    BJReopen = []
+    PAReopen = []
+    for element in reopenlist:
         tz = pytz.timezone('US/Pacific')
         date = datetime.datetime.fromtimestamp(element[0].get('$date') / 1e3, pytz.utc).date()
         element[0] = date
-        BJReopen=[]
-        PAReopen=[]
         if element[2] in BJTeam:
-            BJReopen.append(element)
+            BJReopen.append(element[0])
+            print('BJreopen:' + str(element))
         else:
-            PAReopen.append(element)
-        count(BJReopen[0], foundin+'BJReopen.xlsx')
-        count(PAReopen[0], foundin+'PAReopen.xlsx')
-"""
+            PAReopen.append(element[0])
+            print('PAreopen:' + str(element))
+    count(BJReopen, foundin+'BJReopen.xlsx')
+    count(PAReopen, foundin+'PAReopen.xlsx')
+
 def writetofile(excel_name='bugcount.xlsx', data1=[], data2=[], line_chart='Yes'):
     workbook = xlsxwriter.Workbook(excel_name)
     worksheet = workbook.add_worksheet('sheet1')
@@ -269,31 +296,44 @@ def analyze(infilename, outfilename):
 if __name__ == "__main__":
     print('This is main of module "getDate.py"')
     found_in='CART19FQ2'
-    ReopenNumbyWeekTeam(found_in)
-    """
-    getRegression(found_in, found_in +'_regression.xlsx')
-    SourceFile = found_in +'_regression.xlsx'
-    analyze(SourceFile, 'analyze_' + SourceFile)
-    getassigneelist(found_in)
-    getBugDateforTeam(found_in, found_in + '_bj_defects_all.xlsx', found_in + '_pa_defects_all.xlsx')
-    getBugDateforTeam(found_in, found_in + '_bj_defects_critical.xlsx', found_in + '_pa_defects_critical.xlsx',severity="('critical','catastrophic')")
-    getBugDateforTeam(found_in, found_in + '_bj_defects_regression.xlsx', found_in + '_pa_defects_regression.xlsx',severity="('critical','catastrophic')",cf_regression='Yes')
-    SourceFile= found_in +'_bj_defects_all.xlsx'
-    analyze(SourceFile, 'analyze_' + SourceFile)
 
+    foundin_id = bug.getFoundin(found_in)
+    createbuglist(foundin_id,found_in+'rawbugs.xls')
+
+    """
+    getassigneelist(found_in)
+    ReopenNumbyWeekTeam(found_in)
     SourceFile = found_in + 'BJReopen.xlsx'
     analyze(SourceFile, 'analyze_' + SourceFile)
     SourceFile = found_in + 'PAReopen.xlsx'
     analyze(SourceFile, 'analyze_' + SourceFile)
 
+    getRegression(found_in, found_in +'_regression.xlsx')
+    SourceFile = found_in +'_regression.xlsx'
+    analyze(SourceFile, 'analyze_' + SourceFile)
+
+    getBugDateforTeam(found_in, found_in + '_bj_defects_all.xlsx', found_in + '_pa_defects_all.xlsx')
+    SourceFile = found_in + '_pa_defects_all.xlsx'
+    analyze(SourceFile, 'analyze_' + SourceFile)
+    SourceFile = found_in + '_bj_defects_all.xlsx'
+    analyze(SourceFile, 'analyze_' + SourceFile)
+
+    getBugDateforTeam(found_in, found_in + '_bj_defects_critical.xlsx', found_in + '_pa_defects_critical.xlsx',severity="('critical','catastrophic')")
+    SourceFile= found_in + '_bj_defects_critical.xlsx'
+    analyze(SourceFile, 'analyze_' + SourceFile)
+    SourceFile = found_in + '_pa_defects_critical.xlsx'
+    analyze(SourceFile, 'analyze_' + SourceFile)
+
+    getBugDateforTeam(found_in, found_in + '_bj_defects_regression.xlsx', found_in + '_pa_defects_regression.xlsx',severity="('critical','catastrophic')",cf_regression='Yes')
+    SourceFile= found_in +'_bj_defects_regression.xlsx'
+    analyze(SourceFile, 'analyze_' + SourceFile)
+    SourceFile = found_in + '_pa_defects_regression.xlsx'
+    analyze(SourceFile, 'analyze_' + SourceFile)
 
     BugNumbySeverity(found_in, found_in + 'bugcount_Defect.xlsx')
     BugNumbySeverity(found_in, found_in + 'bugcount_Defect_Critical.xlsx',severity="('critical','catastrophic')")
 
-    foundin_id = bug.getFoundin(found_in)
-    print(bug.getFoundinPhase(foundin_id,"('FC')"))
-    print(bug.getFoundinPhase(foundin_id))
-    """
+
     # createbuglist()
     #getRegression('CART18FQ4', '18fq4_regression.xlsx')
     #getRegression('CART18FQ3', '18fq3_regression.xlsx')
@@ -323,3 +363,4 @@ if __name__ == "__main__":
     # analyze('bugcount_q1_Defect.xlsx', 'analyze_q1_Defect.xlsx')
     # calculatebyDate('Cart17Q2', 'bugcount_q2_Defect.xlsx')
     # analyze('bugcount_q2_Defect.xlsx', 'analyze_q2_Defect.xlsx')
+    """

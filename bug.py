@@ -206,17 +206,17 @@ def getReopenlist(foundin_id,severity = 'all'):
     bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER,
                                 passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
-    sql = """select bug_id from bugs_activity where bug_id in {0} and added in ('new','assigned','reopened') and removed in ('resolved','fixed','closed')""".format(
+    sql = """select distinct bug_id from bugs_activity where bug_id in {0} and added in ('new','assigned','reopened') and removed in ('resolved','fixed','closed')""".format(
         str(df1))
     print(sql)
     cursor.execute(sql)
     update = cursor.fetchall()
-    reopenlist = json.dumps(update,default=json_util.default)
-    print("reopenlist:")
-    print(reopenlist)
-    print(df)
-    print(df.loc[df[1].isin(update)])
-
+    reopenlist = []
+    for i in update:
+        reopenlist.append(i[0])
+    df_reopen = df.loc[df[1].isin(tuple(reopenlist))]
+    #print(df_reopen)
+    return df_reopen.values
 
 def getBugbyDateforReportTeam(foundin_id):
     bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
