@@ -211,9 +211,7 @@ def BugNumbySeverity(foundin, filename, severity='all',regression ='n'):
 def ReopenNumbyWeekTeam(foundin):
     foundin_id = bug.getFoundin(foundin)
     result = bug.getReopenlist(foundin_id)
-    print(result)
-    array = json.load(result)
-
+    """array = json.load(result)
     for element in array:
         tz = pytz.timezone('US/Pacific')
         date = datetime.datetime.fromtimestamp(element[0].get('$date') / 1e3, pytz.utc).date()
@@ -226,7 +224,7 @@ def ReopenNumbyWeekTeam(foundin):
             PAReopen.append(element)
         count(BJReopen[0], foundin+'BJReopen.xlsx')
         count(PAReopen[0], foundin+'PAReopen.xlsx')
-
+"""
 def writetofile(excel_name='bugcount.xlsx', data1=[], data2=[], line_chart='Yes'):
     workbook = xlsxwriter.Workbook(excel_name)
     worksheet = workbook.add_worksheet('sheet1')
@@ -271,8 +269,9 @@ def analyze(infilename, outfilename):
 if __name__ == "__main__":
     print('This is main of module "getDate.py"')
     found_in='CART19FQ2'
-
-    """getRegression(found_in, found_in +'_regression.xlsx')
+    ReopenNumbyWeekTeam(found_in)
+    """
+    getRegression(found_in, found_in +'_regression.xlsx')
     SourceFile = found_in +'_regression.xlsx'
     analyze(SourceFile, 'analyze_' + SourceFile)
     getassigneelist(found_in)
@@ -281,14 +280,13 @@ if __name__ == "__main__":
     getBugDateforTeam(found_in, found_in + '_bj_defects_regression.xlsx', found_in + '_pa_defects_regression.xlsx',severity="('critical','catastrophic')",cf_regression='Yes')
     SourceFile= found_in +'_bj_defects_all.xlsx'
     analyze(SourceFile, 'analyze_' + SourceFile)
-    """
-    ReopenNumbyWeekTeam(found_in)
+
     SourceFile = found_in + 'BJReopen.xlsx'
     analyze(SourceFile, 'analyze_' + SourceFile)
     SourceFile = found_in + 'PAReopen.xlsx'
     analyze(SourceFile, 'analyze_' + SourceFile)
 
-    """
+
     BugNumbySeverity(found_in, found_in + 'bugcount_Defect.xlsx')
     BugNumbySeverity(found_in, found_in + 'bugcount_Defect_Critical.xlsx',severity="('critical','catastrophic')")
 
@@ -325,5 +323,3 @@ if __name__ == "__main__":
     # analyze('bugcount_q1_Defect.xlsx', 'analyze_q1_Defect.xlsx')
     # calculatebyDate('Cart17Q2', 'bugcount_q2_Defect.xlsx')
     # analyze('bugcount_q2_Defect.xlsx', 'analyze_q2_Defect.xlsx')
-
-    
