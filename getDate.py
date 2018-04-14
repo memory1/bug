@@ -295,77 +295,25 @@ def analyze(infilename, outfilename):
     writetofile(outfilename, weeklist, weekcount, 'Yes')
 
 
-if __name__ == "__main__":
-    print('This is main of module "getDate.py"')
-    found_in='CART19FQ2'
-
+def analyse_by_foundin(found_in):
     foundin_id = bug.getFoundin(found_in)
-    createbuglist(foundin_id,'Raw_bugs_'+ found_in+'.xlsx')
-
+    createbuglist(foundin_id, 'Raw_bugs_' + found_in + '.xlsx')
     getassigneelist(found_in)
     ReopenNumbyWeekTeam(found_in)
-    SourceFile = found_in + 'BJReopen.xlsx'
-    #analyze(SourceFile, 'analyze_' + SourceFile)
-    SourceFile = found_in + 'PAReopen.xlsx'
-    #analyze(SourceFile, 'analyze_' + SourceFile)
-
-    getRegression(found_in, found_in +'_regression.xlsx')
-    SourceFile = found_in +'_regression.xlsx'
-    #analyze(SourceFile, 'analyze_' + SourceFile)
-
+    getRegression(found_in, found_in + '_regression.xlsx')
     getBugDateforTeam(found_in, found_in + '_bj_defects_all.xlsx', found_in + '_pa_defects_all.xlsx')
-    SourceFile = found_in + '_pa_defects_all.xlsx'
-    #analyze(SourceFile, 'analyze_' + SourceFile)
-    SourceFile = found_in + '_bj_defects_all.xlsx'
-    #analyze(SourceFile, 'analyze_' + SourceFile)
-
-    getBugDateforTeam(found_in, found_in + '_bj_defects_critical.xlsx', found_in + '_pa_defects_critical.xlsx',severity="('critical','catastrophic')")
-    SourceFile= found_in + '_bj_defects_critical.xlsx'
-    #analyze(SourceFile, 'analyze_' + SourceFile)
-    SourceFile = found_in + '_pa_defects_critical.xlsx'
-    #analyze(SourceFile, 'analyze_' + SourceFile)
-
-    getBugDateforTeam(found_in, found_in + '_bj_defects_regression.xlsx', found_in + '_pa_defects_regression.xlsx',severity="('critical','catastrophic')",cf_regression='Yes')
-    SourceFile= found_in +'_bj_defects_regression.xlsx'
-    #analyze(SourceFile, 'analyze_' + SourceFile)
-    SourceFile = found_in + '_pa_defects_regression.xlsx'
-    #analyze(SourceFile, 'analyze_' + SourceFile)
-
+    getBugDateforTeam(found_in, found_in + '_bj_defects_critical.xlsx', found_in + '_pa_defects_critical.xlsx',
+                      severity="('critical','catastrophic')")
+    getBugDateforTeam(found_in, found_in + '_bj_defects_regression.xlsx', found_in + '_pa_defects_regression.xlsx',
+                      severity="('critical','catastrophic')", cf_regression='Yes')
     BugNumbySeverity(found_in, found_in + 'bugcount_Defect.xlsx')
-    BugNumbySeverity(found_in, found_in + 'bugcount_Defect_Critical.xlsx',severity="('critical','catastrophic')")
-
-    files = {os.path.relpath(p) for p in glob.glob(found_in +'*.xlsx')}
+    BugNumbySeverity(found_in, found_in + 'bugcount_Defect_Critical.xlsx', severity="('critical','catastrophic')")
+    files = glob.glob(found_in + '*.xlsx')
     for f in files:
-        print(f)
-        analyze(f,'analyze_' + f)
-"""
-    # createbuglist()
-    #getRegression('CART18FQ4', '18fq4_regression.xlsx')
-    #getRegression('CART18FQ3', '18fq3_regression.xlsx')
-    #getBugbyDateforKenTeam('CART18FQ4', '18fq4_ken.xlsx')
-    # analyze('bugcount_q4_Defect.xlsx', 'analyze_q4_Defect.xlsx')
-    # getBugbyDateforTeam('Cart17Q2', '18fq2_bj_defect_ser.xlsx', '18fq2_pa_defect_ser.xlsx')
-    # getBugbyDateforTeam('CART18FQ3', '18fq3_bj_defect_ser.xlsx', '18fq3_pa_defect_ser.xlsx')
-    # getBugbyDateforTeam('CART18FQ4', '18fq4_bj_defect_min.xlsx', '18fq4_pa_defect_min.xlsx')
-    # getBugbyDateforTeam('Cart17Q1', '18fq1_bj_Defect.xlsx', '18fq1_pa_Defect.xlsx')
-    # analyze('18fq1_bj_Defect.xlsx', 'analyze_q1_bj_Defect.xlsx')
-    # analyze('18fq1_pa_Defect.xlsx', 'analyze_q1_pa_Defect.xlsx')
-    # getBugbyDateforTeam('CART18FQ4', '18fq4_bj_Defect.xlsx', '18fq4_pa_Defect.xlsx')
-    # analyze('18fq4_bj_Defect.xlsx', 'analyze_q4_bj_Defect.xlsx')
-    # analyze('18fq4_pa_Defect.xlsx', 'analyze_q4_pa_Defect.xlsx')
-    # getBugbyDateforTeam('Cart17Q2', '18fq2_bj_Defect.xlsx', '18fq2_pa_Defect.xlsx')
-    # analyze('18fq2_bj_Defect.xlsx', 'analyze_q2_bj_Defect.xlsx')
-    # analyze('18fq2_pa_Defect.xlsx', 'analyze_q2_pa_Defect.xlsx')
-    # getBugbyDateforTeam('CART18FQ3', '18fq3_bj_Defect.xlsx', '18fq3_pa_Defect.xlsx')
-    # analyze('18fq3_bj_Defect.xlsx', 'analyze_q3_bj_Defect.xlsx')
-    # analyze('18fq3_pa_Defect.xlsx', 'analyze_q3_pa_Defect.xlsx')
-    # createbuglist()
-    # calculatebyDate('CART18FQ4', 'bugcount_q4_Defect.xlsx')
-    # analyze('bugcount_q4_Defect.xlsx', 'analyze_q4_Defect.xlsx')
-    # calculatebyDate('CART18FQ3', 'bugcount_q3_Defect.xlsx')
-    # analyze('bugcount_q3_Defect.xlsx', 'analyze_q3_Defect.xlsx')
-    # calculatebyDate('Cart17Q1', 'bugcount_q1_Defect.xlsx')
-    # analyze('bugcount_q1_Defect.xlsx', 'analyze_q1_Defect.xlsx')
-    # calculatebyDate('Cart17Q2', 'bugcount_q2_Defect.xlsx')
-    # analyze('bugcount_q2_Defect.xlsx', 'analyze_q2_Defect.xlsx')
-    """
+        analyze(f, 'analyze_' + f)
+
+if __name__ == "__main__":
+    print('This is main of module "getDate.py"')
+    foundin_list = ['CART19FQ2','CART18FQ4']  #, 'CART18FQ3', 'Cart17Q2', 'Cart17Q1']
+    for found_in in foundin_list:
+        analyse_by_foundin(found_in)
