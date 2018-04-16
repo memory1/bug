@@ -17,8 +17,8 @@ import glob
 
 BUGZILLA_DATABASE_HOST = "bz3-db3.eng.vmware.com"
 BUGZILLA_DATABASE_PORT = 3306
-BUGZILLA_DATABASE_USER ="mts"
-BUGZILLA_DATABASE_PW="mts"
+BUGZILLA_DATABASE_USER =""
+BUGZILLA_DATABASE_PW=""
 BUGZILLA_DATABASE_DATABASE="bugzilla"
 
 """BJTeam = ['baochenw', 'weiy', 'shuhuawang', 'agong', 'jinxingh', 'hongshengl', 'myuan', 'luliu', 'jhuo', 'rxing',
