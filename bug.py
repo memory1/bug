@@ -24,6 +24,7 @@ BUGZILLA_DATABASE_PORT = 3306
 BUGZILLA_DATABASE_USER ="mts"
 BUGZILLA_DATABASE_PW="mts"
 BUGZILLA_DATABASE_DATABASE="bugzilla"
+i18nbug = ('1800', '1742', '2451' , '736','4718') #SELECT * FROM bugzilla.categories where name = "Horizon DevOps"; 4718
 
 def pic_url(component):
     if component == 'osx':
@@ -142,7 +143,6 @@ def getCountbyPhase(foundin_id, foundin_phase):
     bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
     print(foundin_phase)
-    i18nbug = ('1800', '1742', '2451' , '736')
     if len(foundin_phase)>1:
         sql = """select count(*) from bugs where found_in_phase_id in {0} and  found_in_version_id = '{1}' and product_id = '18' and category_id not in {2}""".format(foundin_phase, foundin_id, i18nbug)
     else:
@@ -155,7 +155,6 @@ def getBugbyFoundin(foundin_id):
     bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     zdb_conn = pymysql.connect(host="bz3-db3.eng.vmware.com", port=3306, user="mts", passwd="mts", db="bugzilla")
     cursor = bzdb_conn.cursor()
-    i18nbug = ('2451', '1800','1742', '736')
     # includes ('L10n Feature Pack', 'L10n Remote Client', 'L10n Server' 'Documentation')
     sql = """select creation_ts,bug_id,profiles.login_name,cf_regression,bug_severity from bugs,profiles where bugs.assigned_to = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1} and cf_type = 'Defect' and short_desc NOT LIKE '%[i18N%'""".format(foundin_id, i18nbug)
     print(sql)
@@ -169,7 +168,6 @@ def getBugbyFoundin(foundin_id):
 def getRegressionBug(foundin_id):
     bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
-    i18nbug = ('2451', '1800','1742', '736')
     sql = """select creation_ts, bug_id,cf_regression from bugs where found_in_version_id = '{0}' and product_id = '18' and category_id not in {1} and cf_type = 'Defect' and short_desc NOT LIKE '%[i18N%' and cf_regression = 'Yes'""".format(foundin_id, i18nbug)
     cursor.execute(sql)
     result= cursor.fetchall()
@@ -179,7 +177,6 @@ def getRegressionBug(foundin_id):
 def getBugbyDateforTeam(foundin_id,severity = 'all',cf_regression='No'):
     bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
-    i18nbug = ('2451', '1800','1742', '736')
     #sql = """select login_name, creation_ts, bug_id, short_desc from bugs, profiles where bugs.assigned_to = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1}  and cf_type = 'Defect' and short_desc NOT LIKE '%[i18N%'""".format(foundin_id, i18nbug)
     #sql = """select login_name, creation_ts, bug_id from bugs, profiles where bugs.assigned_to = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1}  and bug_severity in ('critical', 'catastrophic') and priority in ('P0', 'P1') and cf_type = 'Defect' and short_desc NOT LIKE '%[i18N%'""".format(foundin_id, i18nbug)
     #sql = """select login_name, creation_ts, bug_id from bugs, profiles where bugs.assigned_to = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1}  and priority in ('P2', 'P3', 'P4', '---') and cf_type = 'Defect' and short_desc NOT LIKE '%[i18N%'""".format(foundin_id, i18nbug)
@@ -221,7 +218,6 @@ def getReopenlist(foundin_id,severity = 'all'):
 def getBugbyDateforReportTeam(foundin_id):
     bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
-    i18nbug = ('2451', '1800','1742', '736')
     sql = """select creation_ts, bug_id,login_name from bugs, profiles where bugs.reporter = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1}""".format(foundin_id, i18nbug)
     cursor.execute(sql)
     result= cursor.fetchall()
@@ -231,7 +227,6 @@ def getBugbyDateforReportTeam(foundin_id):
 def getAllAssignee(foundin_id):
     bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     cursor = bzdb_conn.cursor()
-    i18nbug = ('2451', '1800','1742', '736')
     #sql = """select login_name from bugs, profiles where bugs.assigned_to = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1} and bug_severity in ('critical', 'catastrophic') """.format(foundin_id, i18nbug)
     sql = """select login_name from bugs, profiles where bugs.assigned_to = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1}  """.format(
         foundin_id, i18nbug)
@@ -244,16 +239,35 @@ def getBugListbySeverity(foundin_id, severity):
     bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER, passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
     zdb_conn = pymysql.connect(host="bz3-db3.eng.vmware.com", port=3306, user="mts", passwd="mts", db="bugzilla")
     cursor = bzdb_conn.cursor()
-    i18nbug = ('2451', '1800','1742', '736')
     if severity is 'all':
-        sql =  """select creation_ts, bug_id from bugs where found_in_version_id = '{0}' and product_id = '18' and category_id not in {1}""".format(foundin_id, i18nbug)
+        sql =  """select creation_ts, bug_id from bugs where found_in_version_id = '{0}' and product_id = '18' and category_id not in {1} and short_desc NOT LIKE '%[i18N%' """.format(foundin_id, i18nbug)
     else:
-        sql = """select creation_ts, bug_id,bug_severity from bugs where found_in_version_id = '{0}' and product_id = '18' and category_id not in {1} and bug_severity in {2}""".format(foundin_id, i18nbug, severity)
+        sql = """select creation_ts, bug_id,bug_severity from bugs where found_in_version_id = '{0}' and product_id = '18' and category_id not in {1} and bug_severity in {2} and short_desc NOT LIKE '%[i18N%' """.format(foundin_id, i18nbug, severity)
     print(sql)
     cursor.execute(sql)
     result= cursor.fetchall()
     result_json=json.dumps(result,default=json_util.default)
     return result_json
+
+def createbuglist(foundin_id,excel_name):
+    bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER,
+                                passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
+    zdb_conn = pymysql.connect(host="bz3-db3.eng.vmware.com", port=3306, user="mts", passwd="mts", db="bugzilla")
+    cursor = bzdb_conn.cursor()
+    # includes ('L10n Feature Pack', 'L10n Remote Client', 'L10n Server' 'Documentation')
+    sql = """select bugs.bug_id,profiles.login_name,bugs.bug_severity,bugs.bug_status,bugs.creation_ts,bugs.short_desc,bugs.priority,bugs.reporter,bugs.cf_regression,categories.name from bugs,profiles,categories where bugs.assigned_to = profiles.userid and bugs.category_id = categories.id and found_in_version_id = '{0}' and bugs.product_id = '18' and category_id not in {1} and cf_type = 'Defect' and short_desc NOT LIKE '%[i18N%'""".format(
+        foundin_id, i18nbug)
+
+    print(sql)
+    cursor.execute(sql)
+    result = list(cursor.fetchall())
+    title = ['bug_id','assignee','bug_severity','bug_status','creation_ts','short_desc','priority','reporter','cf_regression','category']
+    df = pd.DataFrame(result,columns = title)
+    print(df)
+    writer = pd.ExcelWriter(excel_name,engine='xlsxwriter')
+    df.to_excel(writer,sheet_name="all bugs")
+
+    writer.save()
 
 if __name__ == "__main__":
     print ('This is main of module "bug.py"')

@@ -105,33 +105,9 @@ BJTeam = ['agong',
 
 KenTeam = ['ysan', 'ltim', 'boshil', 'zlin', 'ljack', 'xinshul', 'swan', 'llv', 'scheng', 'youx', 'jsong','zhoujing']
 
+
 # test method
-def createbuglist(foundin_id,excel_name):
-    bzdb_conn = pymysql.connect(host=BUGZILLA_DATABASE_HOST, port=BUGZILLA_DATABASE_PORT, user=BUGZILLA_DATABASE_USER,
-                                passwd=BUGZILLA_DATABASE_PW, db=BUGZILLA_DATABASE_DATABASE)
-    zdb_conn = pymysql.connect(host="bz3-db3.eng.vmware.com", port=3306, user="mts", passwd="mts", db="bugzilla")
-    cursor = bzdb_conn.cursor()
-    i18nbug = ('2451', '1800', '1742', '736')
-    # includes ('L10n Feature Pack', 'L10n Remote Client', 'L10n Server' 'Documentation')
-    sql = """select bug_id,login_name,bug_severity,bug_status,creation_ts,short_desc,priority,reporter,cf_regression from bugs,profiles where bugs.assigned_to = profiles.userid and found_in_version_id = '{0}' and product_id = '18' and category_id not in {1} and cf_type = 'Defect' and short_desc NOT LIKE '%[i18N%'""".format(
-        foundin_id, i18nbug)
 
-    print(sql)
-    cursor.execute(sql)
-    result = list(cursor.fetchall())
-    title = ['bug_id','assignee','bug_severity','bug_status','creation_ts','short_desc','priority','reporter','cf_regression']
-    df = pd.DataFrame(result,columns = title)
-    print(df)
-    writer = pd.ExcelWriter(excel_name,engine='xlsxwriter')
-    df.to_excel(writer,sheet_name="all bugs")
-
-    writer.save()
-    """array = json.loads(BugList)
-    bugs = []
-    for element in array:
-        date = datetime.datetime.fromtimestamp(element[0].get('$date') / 1e3).date()
-        bugs.append( date,element[1:] )
-"""
 def getRegressionBugDateList(foundin):
     foundin_id = bug.getFoundin(foundin)
     result = bug.getRegressionBug(foundin_id)
@@ -297,15 +273,17 @@ def analyze(infilename, outfilename):
 
 def analyse_by_foundin(found_in):
     foundin_id = bug.getFoundin(found_in)
-    createbuglist(foundin_id, 'Raw_bugs_' + found_in + '.xlsx')
+    bug.createbuglist(foundin_id, 'Raw_bugs_' + found_in + '.xlsx')
     getassigneelist(found_in)
     ReopenNumbyWeekTeam(found_in)
-    getRegression(found_in, found_in + '_regression.xlsx')
     getBugDateforTeam(found_in, found_in + '_bj_defects_all.xlsx', found_in + '_pa_defects_all.xlsx')
     getBugDateforTeam(found_in, found_in + '_bj_defects_critical.xlsx', found_in + '_pa_defects_critical.xlsx',
                       severity="('critical','catastrophic')")
-    getBugDateforTeam(found_in, found_in + '_bj_defects_regression.xlsx', found_in + '_pa_defects_regression.xlsx',
+    getBugDateforTeam(found_in, found_in + '_bj_defects_regression_critical.xlsx', found_in + '_pa_defects_regression_critical.xlsx',
                       severity="('critical','catastrophic')", cf_regression='Yes')
+    getBugDateforTeam(found_in, found_in + '_bj_defects_regression_all.xlsx',
+                      found_in + '_pa_defects_regression_all.xlsx', cf_regression='Yes')
+
     BugNumbySeverity(found_in, found_in + 'bugcount_Defect.xlsx')
     BugNumbySeverity(found_in, found_in + 'bugcount_Defect_Critical.xlsx', severity="('critical','catastrophic')")
     files = glob.glob(found_in + '*.xlsx')
@@ -314,6 +292,6 @@ def analyse_by_foundin(found_in):
 
 if __name__ == "__main__":
     print('This is main of module "getDate.py"')
-    foundin_list = ['CART19FQ2','CART18FQ4']  #, 'CART18FQ3', 'Cart17Q2', 'Cart17Q1']
+    foundin_list = ['CART19FQ2'] #,'CART18FQ4', 'CART18FQ3', 'Cart17Q2', 'Cart17Q1']
     for found_in in foundin_list:
         analyse_by_foundin(found_in)
